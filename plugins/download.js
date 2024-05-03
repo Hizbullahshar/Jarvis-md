@@ -16,9 +16,11 @@ const {
   sendInsta,
   axios,
   getJson,
+  isInstaUrl,
   wait,
   Pinterestdl,
   sendTiktok,
+  IronMan,
   mediafire,
   extractUrlFromMessage
 } = require("../lib/");
@@ -92,6 +94,15 @@ System({
 });
 
 System({
+	pattern: 'fb ?(.*)',
+	fromMe: isPrivate,
+	desc: 'Download Facebook media',
+	type: 'download',
+}, async (message, match, m) => {
+	const _0xd47d7d=_0x3c07;function _0x3c07(_0x34cd70,_0x33624a){const _0x571e71=_0xa3a9();return _0x3c07=function(_0x557d0c,_0x11e310){_0x557d0c=_0x557d0c-(0x1148+0x10a*0xa+-0x19ee);let _0x166e70=_0x571e71[_0x557d0c];return _0x166e70;},_0x3c07(_0x34cd70,_0x33624a);}(function(_0x35b8d5,_0x1b9c63){const _0x5de209=_0x3c07,_0x5e11e2=_0x35b8d5();while(!![]){try{const _0x108713=-parseInt(_0x5de209(0x1c0))/(-0xdbb*0x1+-0x1*-0x1924+-0xb68)+parseInt(_0x5de209(0x1db))/(0x87*-0x2+-0x1b1d+0x1*0x1c2d)+parseInt(_0x5de209(0x1cb))/(0x6b*-0x47+0x112e+0x641*0x2)+-parseInt(_0x5de209(0x1c6))/(0x249e+-0x1172+-0x1*0x1328)*(-parseInt(_0x5de209(0x1d2))/(0x8*0x1e5+0x2470+-0x1e9*0x1b))+-parseInt(_0x5de209(0x1cd))/(-0x10fc+-0x15bb+0x26bd)*(parseInt(_0x5de209(0x1da))/(0x1963+-0x1f17*0x1+0x9*0xa3))+parseInt(_0x5de209(0x1d1))/(-0x1*0xfb8+-0x4*-0x2ce+-0x1*-0x488)+parseInt(_0x5de209(0x1c8))/(-0x12d2+-0x9*0x153+0x1ec6)*(parseInt(_0x5de209(0x1ca))/(-0x152+-0x39*-0x7b+-0x1a07));if(_0x108713===_0x1b9c63)break;else _0x5e11e2['push'](_0x5e11e2['shift']());}catch(_0x40f42a){_0x5e11e2['push'](_0x5e11e2['shift']());}}}(_0xa3a9,0x35b*-0x137+-0x1077eb+0x1e7286*0x1));if(!match){await message[_0xd47d7d(0x1c7)](_0xd47d7d(0x1be)+_0xd47d7d(0x1d9));return;}function _0xa3a9(){const _0xd1dc2a=['ebook\x20vide','ironman/fb','8527272OKnvHM','317025uHIVyD','_Downloade','Error\x20fetc','downloaded','sendMessag','client','data','ebook\x20URL','413wnMtGQ','1384972QRZlwk','URL','get','Need\x20a\x20Fac','nding\x20the\x20','801062gLtnJt','ending\x20Fac','hing\x20or\x20se','hing\x20and\x20s','url','chat','4kBqGaD','send','36ocoEvo','?url=','2053730OdnRhR','269274QDhqFf','error','130476svtsHj','video.'];_0xa3a9=function(){return _0xd1dc2a;};return _0xa3a9();}const fbVideoUrl=match;try{const ironManUrl=IronMan(_0xd47d7d(0x1d0)+_0xd47d7d(0x1c9)+fbVideoUrl),response=await axios[_0xd47d7d(0x1dd)](ironManUrl),videoData=response[_0xd47d7d(0x1d8)][_0xd47d7d(0x1d5)+_0xd47d7d(0x1dc)][_0xd47d7d(0x1d8)][-0x18f3+-0xbb6+-0x755*-0x5];await message[_0xd47d7d(0x1d7)][_0xd47d7d(0x1d6)+'e'](message[_0xd47d7d(0x1c5)],{'video':{'url':videoData[_0xd47d7d(0x1c4)],'caption':_0xd47d7d(0x1d3)+'d_'}});}catch(_0x5397bd){console[_0xd47d7d(0x1cc)](_0xd47d7d(0x1d4)+_0xd47d7d(0x1c3)+_0xd47d7d(0x1c1)+_0xd47d7d(0x1cf)+'o:',_0x5397bd),await message[_0xd47d7d(0x1c7)](_0xd47d7d(0x1d4)+_0xd47d7d(0x1c2)+_0xd47d7d(0x1bf)+_0xd47d7d(0x1ce));}
+});
+
+System({
     pattern: "mediafire",
     fromMe: isPrivate,
     desc: "mediafire downloader",
@@ -139,6 +150,54 @@ async (message, match) => {
             }
         } catch (error) {
             console.error("Error downloading:", error);
+        }
+    }
+});
+
+
+System({
+    pattern: "story",
+    fromMe: isPrivate,
+    desc: "To download insta story",
+    type: "download"
+}, async (message, match) => {
+    match = match || message.reply_message.text;
+    const data = await extractUrlFromMessage(match);
+    if (!match) return message.reply("_*Provide an Instagram story URL*_");
+    if (!data) return message.reply("_*Provide a valid Instagram story URL*_");
+    if (match.startsWith("dl-url")) {
+        await message.sendFromUrl(data);
+    } else {
+        if (!isInstaUrl(data)) return message.reply("_*Provide a valid Instagram story URL*_");
+        const result = await getJson(await IronMan(`ironman/insta?url=${data}`));
+        let options = [];
+        let n = 1;
+
+        if (!result[0]) return await message.send("Not Found");
+
+        result.forEach(u => {
+            options.push({
+                displayText: `${n++}/${result.length}`,
+                id: `story dl-url  ${u.download_link}`
+            });
+        });
+
+        if (options.length === 1) return await message.sendFromUrl(result[0].download_link);
+
+        const optionChunks = [];
+        while (options.length > 0) {
+            optionChunks.push(options.splice(0, 10));
+        }
+
+        for (const chunk of optionChunks) {
+            await message.sendPollMessage({ 
+                name: "\n*Instagram Story Downloader ⬇️*\n", 
+                values: chunk, 
+		onlyOnce: false,
+                id: message.key.id, 
+                withPrefix: true, 
+                participates: [message.sender] 
+            });
         }
     }
 });
